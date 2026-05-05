@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TYL 產品知識測驗</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+  :root {
+    --green-deep: #2D6A4F;
+    --green-mid: #40916C;
+    --green-light: #74C69D;
+    --green-pale: #D8F3DC;
+    --green-faint: #F0FAF3;
+    --red-light: #FFE8E8;
+    --red-mid: #E05252;
+    --text-dark: #1B2E22;
+    --text-mid: #4A6355;
+    --text-soft: #7A9A88;
+    --border: #C8E6D4;
+    --white: #FFFFFF;
+    --bg: #F5FBF7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; flex-direction: column; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* ── INTRO SCREEN ── */
+  #intro {
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem 3rem;
+    text-align: center;
+    background: var(--white);
+  }
+
+  .brand-mark {
+    width: 72px; height: 72px;
+    background: var(--green-pale);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+  }
+  .brand-mark svg { width: 36px; height: 36px; }
+
+  .intro-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--green-mid);
+    margin-bottom: .6rem;
+  }
+  .intro-title {
+    font-size: 24px; font-weight: 700; color: var(--text-dark);
+    line-height: 1.3; margin-bottom: .75rem;
+  }
+  .intro-sub {
+    font-size: 14px; color: var(--text-mid); line-height: 1.7;
+    margin-bottom: 2rem; max-width: 300px; margin-left: auto; margin-right: auto;
+  }
+
+  .info-row {
+    display: flex; gap: 10px; margin-bottom: 2.5rem; width: 100%; max-width: 340px;
+  }
+  .info-chip {
+    flex: 1; background: var(--green-faint);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: .75rem .5rem; text-align: center;
+  }
+  .info-chip-num { font-size: 20px; font-weight: 700; color: var(--green-deep); }
+  .info-chip-lbl { font-size: 11px; color: var(--text-soft); margin-top: 2px; }
+
+  .start-btn {
+    width: 100%; max-width: 340px;
+    background: var(--green-deep); color: var(--white);
+    border: none; border-radius: 14px;
+    font-size: 16px; font-weight: 700; font-family: inherit;
+    padding: 16px; cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  .start-btn:active { background: var(--green-mid); transform: scale(.98); }
+
+  /* ── QUIZ SCREEN ── */
+  #quiz { background: var(--bg); padding-bottom: 2rem; }
+
+  .quiz-topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.25rem .75rem;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .topbar-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: .6rem;
+  }
+  .topbar-label { font-size: 12px; font-weight: 700; color: var(--green-mid); letter-spacing: .06em; }
+  .topbar-count { font-size: 12px; color: var(--text-soft); }
+
+  .progress-track {
+    height: 4px; background: var(--green-pale); border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--green-mid); border-radius: 2px;
+    transition: width .4s ease;
+  }
+
+  .q-wrap { padding: 1.5rem 1.25rem 1rem; }
+
+  .q-section-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px;
+    margin-bottom: 1rem;
+  }
+  .tag-dht { background: #EEF0FE; color: #3C3489; }
+  .tag-use { background: var(--green-pale); color: var(--green-deep); }
+
+  .q-number { font-size: 11px; color: var(--text-soft); margin-bottom: .4rem; }
+  .q-text {
+    font-size: 17px; font-weight: 700; color: var(--text-dark);
+    line-height: 1.5; margin-bottom: 1.25rem;
+  }
+
+  .opts { display: flex; flex-direction: column; gap: 8px; }
+
+  .opt {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, transform .1s;
+    -webkit-user-select: none; user-select: none;
+  }
+  .opt:active { transform: scale(.985); }
+  .opt.locked { pointer-events: none; }
+  .opt.sel-correct { background: #EBF7F0; border-color: var(--green-mid); }
+  .opt.sel-wrong   { background: var(--red-light); border-color: var(--red-mid); }
+  .opt.reveal      { background: #EBF7F0; border-color: var(--green-mid); }
+
+  .opt-key {
+    width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+    background: var(--green-faint); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: var(--text-soft);
+    margin-top: 1px;
+  }
+  .opt.sel-correct .opt-key { background: var(--green-mid); border-color: var(--green-mid); color: #fff; }
+  .opt.sel-wrong   .opt-key { background: var(--red-mid); border-color: var(--red-mid); color: #fff; }
+  .opt.reveal      .opt-key { background: var(--green-mid); border-color: var(--green-mid); color: #fff; }
+
+  .opt-body {}
+  .opt-main { font-size: 14px; font-weight: 500; color: var(--text-dark); line-height: 1.5; }
+  .opt-sub  { font-size: 12px; color: var(--text-soft); margin-top: 2px; line-height: 1.4; }
+
+  .feedback {
+    display: none;
+    margin: 10px 0 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px; line-height: 1.65;
+    border-left: 3px solid;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { border-color: var(--green-mid); background: #EBF7F0; color: var(--green-deep); }
+  .feedback.wrong   { border-color: var(--red-mid); background: var(--red-light); color: #7A2020; }
+
+  .next-btn {
+    display: none;
+    width: calc(100% - 2.5rem);
+    margin: 1rem 1.25rem 0;
+    background: var(--green-deep); color: var(--white);
+    border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    padding: 14px; cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  .next-btn.show { display: block; }
+  .next-btn:active { transform: scale(.98); }
+
+  /* ── RESULT SCREEN ── */
+  #result {
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2.5rem 1.5rem 3rem;
+    background: var(--white);
+  }
+
+  .result-icon {
+    width: 80px; height: 80px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem; font-size: 36px;
+  }
+  .icon-great { background: var(--green-pale); }
+  .icon-ok    { background: #FFF8E1; }
+  .icon-low   { background: var(--red-light); }
+
+  .result-pct {
+    font-size: 52px; font-weight: 700; color: var(--text-dark);
+    text-align: center; line-height: 1;
+  }
+  .result-verdict {
+    font-size: 15px; font-weight: 700; color: var(--green-mid);
+    text-align: center; margin: .5rem 0 1.5rem;
+  }
+
+  .result-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px; width: 100%; max-width: 340px; margin-bottom: 1.5rem;
+  }
+  .result-cell {
+    background: var(--green-faint); border: 1px solid var(--border);
+    border-radius: 10px; padding: .75rem .5rem; text-align: center;
+  }
+  .result-cell-num { font-size: 22px; font-weight: 700; }
+  .result-cell-lbl { font-size: 11px; color: var(--text-soft); margin-top: 2px; }
+  .num-c { color: var(--green-mid); }
+  .num-w { color: var(--red-mid); }
+  .num-t { color: var(--text-dark); }
+
+  .result-msg {
+    width: 100%; max-width: 340px;
+    background: var(--green-faint); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem 1.1rem;
+    font-size: 13px; color: var(--text-mid); line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .retry-btn {
+    width: 100%; max-width: 340px;
+    background: var(--white); color: var(--green-deep);
+    border: 1.5px solid var(--green-mid);
+    border-radius: 14px;
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    padding: 14px; cursor: pointer;
+    transition: background .15s;
+  }
+  .retry-btn:active { background: var(--green-faint); }
+</style>
+</head>
+<body>
+
+<!-- ① 開場畫面 -->
+<div class="screen active" id="intro">
+  <div class="brand-mark">
+    <svg viewBox="0 0 36 36" fill="none">
+      <circle cx="18" cy="18" r="16" fill="#40916C" opacity=".15"/>
+      <path d="M18 8 C18 8 10 14 10 21 C10 25.4 13.6 29 18 29 C22.4 29 26 25.4 26 21 C26 14 18 8 18 8Z" fill="#2D6A4F"/>
+      <path d="M18 14 C18 14 14 18 14 21 C14 23.2 15.8 25 18 25 C20.2 25 22 23.2 22 21 C22 18 18 14 18 14Z" fill="#74C69D"/>
+    </svg>
+  </div>
+  <div class="intro-label">TYL × 產品知識測驗</div>
+  <div class="intro-title">你真的了解<br>TYL 養髮液嗎？</div>
+  <div class="intro-sub">5 道題目，測驗你對 DHT 機制與養髮液正確使用方式的掌握程度。</div>
+  <div class="info-row">
+    <div class="info-chip">
+      <div class="info-chip-num">5</div>
+      <div class="info-chip-lbl">題目</div>
+    </div>
+    <div class="info-chip">
+      <div class="info-chip-num">2</div>
+      <div class="info-chip-lbl">主題</div>
+    </div>
+    <div class="info-chip">
+      <div class="info-chip-num">~3</div>
+      <div class="info-chip-lbl">分鐘</div>
+    </div>
+  </div>
+  <button class="start-btn" onclick="startQuiz()">開始測驗</button>
+</div>
+
+<!-- ② 題目畫面 -->
+<div class="screen" id="quiz">
+  <div class="quiz-topbar">
+    <div class="topbar-row">
+      <span class="topbar-label">TYL 知識測驗</span>
+      <span class="topbar-count" id="q-count">1 / 5</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="prog" style="width:0%"></div>
+    </div>
+  </div>
+  <div class="q-wrap" id="q-wrap"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQ()">下一題 →</button>
+</div>
+
+<!-- ③ 結果畫面 -->
+<div class="screen" id="result">
+  <div class="result-icon" id="res-icon"></div>
+  <div class="result-pct" id="res-pct"></div>
+  <div class="result-verdict" id="res-verdict"></div>
+  <div class="result-grid">
+    <div class="result-cell">
+      <div class="result-cell-num num-c" id="rc-correct">0</div>
+      <div class="result-cell-lbl">答對</div>
+    </div>
+    <div class="result-cell">
+      <div class="result-cell-num num-w" id="rc-wrong">0</div>
+      <div class="result-cell-lbl">答錯</div>
+    </div>
+    <div class="result-cell">
+      <div class="result-cell-num num-t">5</div>
+      <div class="result-cell-lbl">總題數</div>
+    </div>
+  </div>
+  <div class="result-msg" id="res-msg"></div>
+  <button class="retry-btn" onclick="retryQuiz()">重新挑戰</button>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    section: 'dht',
+    sectionLabel: 'DHT 研究與機制',
+    text: 'DHT（二氫睪固酮）對毛囊的主要影響是什麼？',
+    opts: [
+      { main: '使毛囊逐漸微小化，縮短生長期、延長休止期', sub: '最終導致毛囊停止生長' },
+      { main: '直接破壞毛囊細胞，造成立即性脫落', sub: '屬於急性損傷機制' },
+      { main: '阻斷頭皮血液循環，使養分無法輸送至毛囊', sub: '影響毛囊營養供給' },
+      { main: '僅影響老年族群，年輕人無需擔心', sub: '與年齡直接相關' }
+    ],
+    correct: 0,
+    feedbackCorrect: '正確！DHT 透過「毛囊微小化」機制附著毛囊，使其逐漸萎縮。生長期縮短、休止期延長，最終毛囊只能長出細如絨毛的頭髮，甚至完全停止生長。',
+    feedbackWrong: '不正確。DHT 並非立即破壞毛囊，而是透過「毛囊微小化」的漸進過程讓毛囊慢慢萎縮，生長期縮短、休止期延長，過程可能歷時數年。'
+  },
+  {
+    section: 'dht',
+    sectionLabel: 'DHT 研究與機制',
+    text: '野大豆籽萃取精華中的 Equol 物質，阻斷 DHT 的機制為何？',
+    opts: [
+      { main: '抑制 5α-還原酶，從源頭減少 DHT 的生成', sub: '酵素層級的阻斷' },
+      { main: '主動與體內 DHT 結合，使其無法攻擊毛囊受體', sub: '中和殘餘 DHT 分子' },
+      { main: '強化毛囊細胞壁，提高對 DHT 的物理抵抗力', sub: '結構性防護機制' },
+      { main: '促進雌激素分泌，平衡雄性荷爾蒙比例', sub: '荷爾蒙調節途徑' }
+    ],
+    correct: 1,
+    feedbackCorrect: '正確！Equol 是野大豆異黃酮在體內的代謝物，其機制是主動與 DHT 分子結合，讓殘餘 DHT 無法再攻擊毛囊受體，達到中和效果。',
+    feedbackWrong: '不正確。Equol 的機制是與 DHT 直接結合、中和，而非抑制酵素。抑制 5α-還原酶（減少 DHT 生成）是人蔘萃取精華的機制，兩者要區分清楚。'
+  },
+  {
+    section: 'use',
+    sectionLabel: '正確使用方式',
+    text: '使用 TYL 養髮液前，頭皮的正確狀態應為？',
+    opts: [
+      { main: '洗完頭、頭皮吹乾後使用', sub: '毛孔微開，成分滲透效率最佳' },
+      { main: '頭髮全乾後再使用，包含髮絲', sub: '確保成分不被稀釋' },
+      { main: '洗頭後直接濕髮使用，不需吹乾', sub: '縮短準備時間' },
+      { main: '乾髮狀態，任何時間皆可', sub: '不受洗髮時程限制' }
+    ],
+    correct: 0,
+    feedbackCorrect: '正確！洗完頭、頭皮吹乾後為最佳使用時機。不需等全部髮絲吹乾，但頭皮本身要先吹乾，此時毛孔微開，有效成分滲透率最高。',
+    feedbackWrong: '不正確。建議在洗頭後、頭皮吹乾後使用。不需等整頭頭髮全乾，但頭皮本身應先吹乾，這時毛孔微開，成分可以最高效率滲透至毛囊。'
+  },
+  {
+    section: 'use',
+    sectionLabel: '正確使用方式',
+    text: '養髮液噴灑時，每條分線的建議噴灑次數及正確部位為？',
+    opts: [
+      { main: '每條分線 3–5 次，噴於髮絲覆蓋整個頭部', sub: '確保全面覆蓋' },
+      { main: '每條分線 1–2 次，直接噴於頭皮而非髮絲', sub: '成分直達毛囊，避免浪費' },
+      { main: '每條分線 1 次，噴於髮根位置即可', sub: '節省用量' },
+      { main: '不限次數，噴至頭皮明顯濕潤為止', sub: '劑量越多效果越好' }
+    ],
+    correct: 1,
+    feedbackCorrect: '正確！每條分線噴 1–2 次，且必須直接噴於頭皮，而非髮絲。噴在頭髮上會被髮絲攔截，成分無法有效抵達毛囊。',
+    feedbackWrong: '不正確。正確用量為每條分線 1–2 次，重點是噴於頭皮而非髮絲。過多用量不會提升效果，且成分必須接觸頭皮才能被毛囊吸收。'
+  },
+  {
+    section: 'use',
+    sectionLabel: '正確使用方式',
+    text: '噴灑養髮液後，正確的後續操作是？',
+    opts: [
+      { main: '立刻沖水，避免成分殘留刺激頭皮', sub: '保持頭皮清潔' },
+      { main: '靜置 10 分鐘後吹乾，不可按摩避免刺激', sub: '讓成分自然滲透' },
+      { main: '以指腹輕按摩 1–3 分鐘，不需沖洗，可直接入睡', sub: '促進最深層吸收，睡眠中持續作用' },
+      { main: '用梳子梳開，使養髮液均勻分布至髮絲', sub: '提升整體覆蓋率' }
+    ],
+    correct: 2,
+    feedbackCorrect: '正確！噴灑後以指腹輕按摩 1–3 分鐘，幫助成分深層滲透，且不需沖洗。可以直接入睡，讓有效成分在睡眠中持續對毛囊發揮作用。',
+    feedbackWrong: '不正確。噴灑後應以指腹輕按摩 1–3 分鐘，並且不需沖洗。若沖洗，等於把有效成分全部洗去，完全失去養護效果。'
+  }
+];
+
+const KEYS = ['A','B','C','D'];
+let current = 0;
+let score = 0;
+let answered = false;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuiz() {
+  current = 0; score = 0;
+  showScreen('quiz');
+  renderQ();
+}
+
+function renderQ() {
+  answered = false;
+  const q = QUESTIONS[current];
+  document.getElementById('q-count').textContent = (current+1) + ' / 5';
+  document.getElementById('prog').style.width = (current / 5 * 100) + '%';
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.className = 'next-btn';
+  nextBtn.textContent = current < 4 ? '下一題 →' : '查看結果';
+
+  const wrap = document.getElementById('q-wrap');
+  const tagClass = q.section === 'dht' ? 'tag-dht' : 'tag-use';
+
+  let optsHTML = q.opts.map((o, i) => `
+    <div class="opt" id="opt-${i}" onclick="selectOpt(${i})">
+      <div class="opt-key">${KEYS[i]}</div>
+      <div class="opt-body">
+        <div class="opt-main">${o.main}</div>
+        <div class="opt-sub">${o.sub}</div>
+      </div>
+    </div>
+  `).join('');
+
+  wrap.innerHTML = `
+    <div class="q-section-tag ${tagClass}">${q.sectionLabel}</div>
+    <div class="q-number">問題 ${current+1}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="opts" id="opts">${optsHTML}</div>
+    <div class="feedback" id="feedback"></div>
+  `;
+}
+
+function selectOpt(idx) {
+  if (answered) return;
+  answered = true;
+  const q = QUESTIONS[current];
+  const correct = idx === q.correct;
+  if (correct) score++;
+
+  document.querySelectorAll('.opt').forEach((el, i) => {
+    el.classList.add('locked');
+    if (i === idx) el.classList.add(correct ? 'sel-correct' : 'sel-wrong');
+    else if (i === q.correct && !correct) el.classList.add('reveal');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show ' + (correct ? 'correct' : 'wrong');
+  fb.textContent = correct ? q.feedbackCorrect : q.feedbackWrong;
+
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function nextQ() {
+  if (current < 4) {
+    current++;
+    renderQ();
+    document.querySelector('#quiz').scrollTo(0,0);
+    window.scrollTo(0,0);
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  const pct = Math.round(score / 5 * 100);
+  const wrong = 5 - score;
+
+  let icon, verdict, msg;
+  if (score >= 5) {
+    icon = '🌿'; verdict = '完美掌握！知識滿分';
+    msg = '你對 TYL 養髮液的成分機制與使用方法掌握非常完整。這正是協助顧客達到最佳效果的關鍵基礎！';
+  } else if (score >= 4) {
+    icon = '✅'; verdict = '知識掌握度優異';
+    msg = '整體表現很好！建議再複習一下答錯的部分，確保每個步驟都能精準傳達給顧客。';
+  } else if (score >= 3) {
+    icon = '📖'; verdict = '基本概念已建立，細節需加強';
+    msg = '核心概念有掌握，但部分操作細節還需要強化。建議重新閱讀養髮終極指南的使用步驟與成分說明章節。';
+  } else {
+    icon = '🔄'; verdict = '建議重新閱讀產品指南';
+    msg = '這次測驗顯示對產品知識還需要深化。請重新閱讀 TYL 養髮終極指南，特別是 DHT 機制與正確使用步驟的部分。';
+  }
+
+  document.getElementById('res-icon').textContent = icon;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-verdict').textContent = verdict;
+  document.getElementById('rc-correct').textContent = score;
+  document.getElementById('rc-wrong').textContent = wrong;
+  document.getElementById('res-msg').textContent = msg;
+
+  showScreen('result');
+}
+
+function retryQuiz() {
+  current = 0; score = 0;
+  showScreen('quiz');
+  renderQ();
+}
+
+// LIFF init — 若不在 LINE 環境中仍可正常運作
+try {
+  liff.init({ liffId: 'YOUR_LIFF_ID_HERE' }).catch(() => {});
+} catch(e) {}
+</script>
+</body>
+</html>
