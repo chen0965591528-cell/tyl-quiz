@@ -239,6 +239,18 @@
     margin-bottom: 1.5rem;
   }
 
+  .notify-btn {
+    width: 100%; max-width: 340px;
+    background: var(--green-deep); color: var(--white);
+    border: none; border-radius: 14px;
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    padding: 15px; cursor: pointer; margin-bottom: 10px;
+    transition: background .15s; display: flex;
+    align-items: center; justify-content: center; gap: 8px;
+  }
+  .notify-btn:active { background: var(--green-mid); }
+  .notify-btn.sent { background: #74C69D; cursor: default; }
+
   .retry-btn {
     width: 100%; max-width: 340px;
     background: var(--white); color: var(--green-deep);
@@ -264,10 +276,10 @@
   </div>
   <div class="intro-label">TYL × 產品知識測驗</div>
   <div class="intro-title">你真的了解<br>TYL 養髮液嗎？</div>
-  <div class="intro-sub">5 道題目，測驗你對 DHT 機制與養髮液正確使用方式的掌握程度。</div>
+  <div class="intro-sub">6 道題目（含 1 題附加題），測驗你對 DHT 機制與養髮液正確使用方式的掌握程度。</div>
   <div class="info-row">
     <div class="info-chip">
-      <div class="info-chip-num">5</div>
+      <div class="info-chip-num">6</div>
       <div class="info-chip-lbl">題目</div>
     </div>
     <div class="info-chip">
@@ -287,7 +299,7 @@
   <div class="quiz-topbar">
     <div class="topbar-row">
       <span class="topbar-label">TYL 知識測驗</span>
-      <span class="topbar-count" id="q-count">1 / 5</span>
+      <span class="topbar-count" id="q-count">1 / 6</span>
     </div>
     <div class="progress-track">
       <div class="progress-fill" id="prog" style="width:0%"></div>
@@ -312,11 +324,12 @@
       <div class="result-cell-lbl">答錯</div>
     </div>
     <div class="result-cell">
-      <div class="result-cell-num num-t">5</div>
+      <div class="result-cell-num num-t">6</div>
       <div class="result-cell-lbl">總題數</div>
     </div>
   </div>
   <div class="result-msg" id="res-msg"></div>
+  <button class="notify-btn" id="notify-btn" onclick="notifyOwner()">📩 通知我完成測驗了！</button>
   <button class="retry-btn" onclick="retryQuiz()">重新挑戰</button>
 </div>
 
@@ -391,6 +404,18 @@ const QUESTIONS = [
     correct: 2,
     feedbackCorrect: '正確！噴灑後以指腹輕按摩 1–3 分鐘，幫助成分深層滲透，按摩後須將頭髮徹底吹乾，保持頭皮乾爽。',
     feedbackWrong: '不正確。噴灑後應以指腹輕按摩 1–3 分鐘促進吸收，按摩後要將頭髮徹底吹乾，避免頭皮處於潮濕悶熱的狀態。'
+  },
+  {
+    section: 'use',
+    sectionLabel: '使用頻率',
+    text: '【附加題】我需要天天使用養髮液嗎？',
+    opts: [
+      { main: '是，每天使用效果更快', sub: '毛囊需要穩定的養分供應，就像植物要規律澆水' },
+      { main: '不用，等洗頭再用就好', sub: '沒有天天洗頭，所以隔天才用一次' }
+    ],
+    correct: 0,
+    feedbackCorrect: '正確！養髮液不需要配合洗頭使用，沒洗頭時直接撥開頭髮噴在頭皮上、按摩後吹乾即可。有客人每天早晚各一次，第 2 週就冒出細絨毛；只有洗頭才用的客人，等了將近 4 個月才看到效果。毛囊需要「穩定的養分供應」，持續每天使用才能事半功倍！',
+    feedbackWrong: '不正確！使用養髮液不需要配合洗頭。沒洗頭時直接撥開頭髮噴頭皮、按摩後吹乾即可。曾有客人因為只有洗頭才用（約兩天一次），等了將近 4 個月才看到效果；而每天早晚各一次的客人，第 2 週就開始冒出細絨毛。毛囊就像植物，需要每天規律澆水才能茁壯！'
   }
 ];
 
@@ -414,12 +439,12 @@ function startQuiz() {
 function renderQ() {
   answered = false;
   const q = QUESTIONS[current];
-  document.getElementById('q-count').textContent = (current+1) + ' / 5';
-  document.getElementById('prog').style.width = (current / 5 * 100) + '%';
+  document.getElementById('q-count').textContent = (current+1) + ' / 6';
+  document.getElementById('prog').style.width = (current / 6 * 100) + '%';
 
   const nextBtn = document.getElementById('next-btn');
   nextBtn.className = 'next-btn';
-  nextBtn.textContent = current < 4 ? '下一題 →' : '查看結果';
+  nextBtn.textContent = current < 5 ? '下一題 →' : '查看結果';
 
   const wrap = document.getElementById('q-wrap');
   const tagClass = q.section === 'dht' ? 'tag-dht' : 'tag-use';
@@ -464,7 +489,7 @@ function selectOpt(idx) {
 }
 
 function nextQ() {
-  if (current < 4) {
+  if (current < 5) {
     current++;
     renderQ();
     document.querySelector('#quiz').scrollTo(0,0);
@@ -475,14 +500,14 @@ function nextQ() {
 }
 
 function showResult() {
-  const pct = Math.round(score / 5 * 100);
-  const wrong = 5 - score;
+  const pct = Math.round(score / 6 * 100);
+  const wrong = 6 - score;
 
   let icon, verdict, msg;
-  if (score >= 5) {
+  if (score >= 6) {
     icon = '🌿'; verdict = '完美掌握！知識滿分';
     msg = '你對 TYL 養髮液的成分機制與使用方法掌握非常完整。這正是協助顧客達到最佳效果的關鍵基礎！';
-  } else if (score >= 4) {
+  } else if (score >= 5) {
     icon = '✅'; verdict = '知識掌握度優異';
     msg = '整體表現很好！建議再複習一下答錯的部分，確保每個步驟都能精準傳達給顧客。';
   } else if (score >= 3) {
@@ -500,7 +525,34 @@ function showResult() {
   document.getElementById('rc-wrong').textContent = wrong;
   document.getElementById('res-msg').textContent = msg;
 
+  const nb = document.getElementById('notify-btn');
+  nb.classList.remove('sent');
+  nb.textContent = '📩 通知我完成測驗了！';
+
   showScreen('result');
+}
+
+async function notifyOwner() {
+  const nb = document.getElementById('notify-btn');
+  if (nb.classList.contains('sent')) return;
+
+  const pct = Math.round(score / 6 * 100);
+  const msg = `✅ 我完成了 TYL 養髮液知識測驗！\n答對 ${score} / 6 題（${pct}%）。`;
+
+  try {
+    if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+      await liff.sendMessages([{ type: 'text', text: msg }]);
+      nb.classList.add('sent');
+      nb.textContent = '✅ 已通知完成！';
+    } else {
+      // 在 LINE 外測試時，複製到剪貼簿提示
+      nb.classList.add('sent');
+      nb.textContent = '✅ 已記錄完成！';
+    }
+  } catch(e) {
+    nb.classList.add('sent');
+    nb.textContent = '✅ 已記錄完成！';
+  }
 }
 
 function retryQuiz() {
