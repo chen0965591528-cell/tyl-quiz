@@ -532,27 +532,26 @@ function showResult() {
   showScreen('result');
 }
 
-async function notifyOwner() {
+function notifyOwner() {
   const nb = document.getElementById('notify-btn');
   if (nb.classList.contains('sent')) return;
 
   const pct = Math.round(score / 6 * 100);
-  const msg = `✅ 我完成了 TYL 養髮液知識測驗！\n答對 ${score} / 6 題（${pct}%）。`;
+  const msg = encodeURIComponent(`我完成了 TYL 養髮液知識測驗！答對 ${score} / 6 題（${pct}%）`);
+  const url = `https://line.me/R/oaMessage/@tyltyltyl/?${msg}`;
 
   try {
-    if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
-      await liff.sendMessages([{ type: 'text', text: msg }]);
-      nb.classList.add('sent');
-      nb.textContent = '✅ 已通知完成！';
+    if (typeof liff !== 'undefined' && liff.openWindow) {
+      liff.openWindow({ url: url, external: false });
     } else {
-      // 在 LINE 外測試時，複製到剪貼簿提示
-      nb.classList.add('sent');
-      nb.textContent = '✅ 已記錄完成！';
+      window.open(url, '_blank');
     }
   } catch(e) {
-    nb.classList.add('sent');
-    nb.textContent = '✅ 已記錄完成！';
+    window.open(url, '_blank');
   }
+
+  nb.classList.add('sent');
+  nb.textContent = '✅ 已開啟通知視窗！';
 }
 
 function retryQuiz() {
