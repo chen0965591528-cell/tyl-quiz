@@ -469,8 +469,10 @@ function selectMS(idx) {
 function sendResult() {
   const btn = document.getElementById('send-btn');
   if (btn.classList.contains('sent')) return;
-  const msLabel = MILESTONES[selectedMS].match(/（(.+)）/)[1];
-  const msg = `我想解決${PROBLEMS[selectedProblem].label}，目標是${msLabel}`;
+  const msText = MILESTONES[selectedMS];
+  const msNum = msText.match(/\d/)[0];
+  const msLabel = msText.match(/（(.+)）/)[1];
+  const msg = `我想解決${PROBLEMS[selectedProblem].label}，目標是${msLabel}（里程碑${msNum}）`;
   try {
     if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
       liff.openWindow({ url: `https://line.me/R/oaMessage/@tyltyltyl/?${encodeURIComponent(msg)}`, external: false });
