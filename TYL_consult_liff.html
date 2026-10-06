@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TYL 養髮顧問</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+:root {
+  --green-deep: #2D6A4F;
+  --green-mid: #40916C;
+  --green-light: #74C69D;
+  --green-pale: #D8F3DC;
+  --green-faint: #F0FAF3;
+  --text-dark: #1B2E22;
+  --text-mid: #4A6355;
+  --text-soft: #7A9A88;
+  --border: #C8E6D4;
+  --white: #FFFFFF;
+  --bg: #F5FBF7;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  color: var(--text-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 28px 20px 40px;
+}
+.screen.active { display: flex; }
+
+/* ── INTRO ── */
+.brand-mark {
+  width: 56px; height: 56px; margin-bottom: 16px;
+}
+.intro-label {
+  font-size: 12px; font-weight: 500; letter-spacing: .08em;
+  color: var(--green-mid); margin-bottom: 10px;
+}
+.intro-title {
+  font-size: 28px; font-weight: 700; color: var(--text-dark);
+  text-align: center; line-height: 1.4; margin-bottom: 10px;
+}
+.intro-sub {
+  font-size: 14px; color: var(--text-mid); text-align: center;
+  line-height: 1.7; margin-bottom: 32px; max-width: 300px;
+}
+.start-btn {
+  width: 100%; max-width: 320px;
+  background: var(--green-deep); color: var(--white);
+  border: none; border-radius: 16px;
+  font-size: 16px; font-weight: 700; font-family: inherit;
+  padding: 16px; cursor: pointer;
+}
+
+/* ── STEP SHELL ── */
+.step-topbar {
+  width: 100%; max-width: 400px; margin-bottom: 24px;
+}
+.step-progress-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.step-label { font-size: 12px; color: var(--text-soft); }
+.step-count { font-size: 12px; font-weight: 700; color: var(--green-mid); }
+.prog-track {
+  height: 4px; background: var(--green-pale); border-radius: 2px;
+}
+.prog-fill {
+  height: 100%; background: var(--green-mid); border-radius: 2px;
+  transition: width .35s ease;
+}
+
+.step-q {
+  width: 100%; max-width: 400px;
+  font-size: 20px; font-weight: 700; color: var(--text-dark);
+  line-height: 1.5; margin-bottom: 20px;
+}
+.step-sub {
+  width: 100%; max-width: 400px;
+  font-size: 13px; color: var(--text-mid); line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+/* ── OPTIONS ── */
+.opts-grid {
+  width: 100%; max-width: 400px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 24px;
+}
+.opt-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 14px 12px;
+  cursor: pointer; transition: all .15s;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 6px;
+}
+.opt-card:active, .opt-card.selected {
+  border-color: var(--green-mid);
+  background: var(--green-faint);
+}
+.opt-card.selected { border-width: 2px; }
+.opt-icon { font-size: 28px; }
+.opt-label { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+.opt-desc { font-size: 11px; color: var(--text-soft); line-height: 1.5; }
+
+/* ── REASSURANCE ── */
+.reassure-box {
+  width: 100%; max-width: 400px;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 20px;
+  margin-bottom: 24px;
+}
+.reassure-tag {
+  display: inline-block;
+  background: var(--green-pale); color: var(--green-deep);
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px; margin-bottom: 12px;
+}
+.reassure-text {
+  font-size: 14px; color: var(--text-mid); line-height: 1.8;
+}
+
+/* ── MILESTONE GRID ── */
+.milestone-grid {
+  width: 100%; max-width: 400px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px; margin-bottom: 24px;
+}
+.ms-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 12px 8px;
+  cursor: pointer; transition: all .15s;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 4px;
+}
+.ms-card:active, .ms-card.selected {
+  border-color: var(--green-mid);
+  background: var(--green-faint);
+}
+.ms-card.selected { border-width: 2px; }
+.ms-num {
+  font-size: 10px; font-weight: 700; color: var(--green-mid);
+  background: var(--green-pale); padding: 2px 6px; border-radius: 10px;
+}
+.ms-icon { font-size: 22px; }
+.ms-label { font-size: 12px; font-weight: 700; color: var(--text-dark); }
+.ms-desc { font-size: 10px; color: var(--text-soft); line-height: 1.4; }
+
+/* ── RESULT ── */
+.result-summary {
+  width: 100%; max-width: 400px;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 20px; margin-bottom: 20px;
+}
+.result-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.result-row:last-child { border-bottom: none; padding-bottom: 0; }
+.result-key {
+  font-size: 12px; color: var(--text-soft); min-width: 80px; padding-top: 2px;
+}
+.result-val { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+
+/* ── MILESTONE 2 ENDING ── */
+.ms2-box {
+  width: 100%; max-width: 400px;
+  background: linear-gradient(135deg, #1B4332, #2D6A4F);
+  border-radius: 20px; padding: 28px 24px;
+  margin-bottom: 24px; color: var(--white); text-align: center;
+}
+.ms2-badge {
+  display: inline-block;
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+  font-size: 11px; font-weight: 700; padding: 4px 14px;
+  border-radius: 20px; margin-bottom: 16px; letter-spacing: .05em;
+}
+.ms2-title {
+  font-size: 22px; font-weight: 700; line-height: 1.5;
+  margin-bottom: 14px;
+}
+.ms2-title span { color: var(--green-light); }
+.ms2-body {
+  font-size: 14px; line-height: 1.8; color: rgba(255,255,255,.85);
+}
+.ms2-divider {
+  width: 40px; height: 2px; background: var(--green-light);
+  margin: 16px auto;
+}
+
+/* ── BUTTONS ── */
+.next-btn {
+  width: 100%; max-width: 400px;
+  background: var(--green-deep); color: var(--white);
+  border: none; border-radius: 14px;
+  font-size: 16px; font-weight: 700; font-family: inherit;
+  padding: 15px; cursor: pointer; margin-bottom: 10px;
+  display: none;
+}
+.next-btn.show { display: block; }
+
+.send-btn {
+  width: 100%; max-width: 400px;
+  background: var(--green-deep); color: var(--white);
+  border: none; border-radius: 14px;
+  font-size: 16px; font-weight: 700; font-family: inherit;
+  padding: 15px; cursor: pointer; margin-bottom: 10px;
+}
+.send-btn.sent { background: var(--green-light); cursor: default; }
+
+.restart-btn {
+  width: 100%; max-width: 400px;
+  background: var(--white); color: var(--green-deep);
+  border: 1.5px solid var(--green-mid); border-radius: 14px;
+  font-size: 14px; font-weight: 700; font-family: inherit;
+  padding: 13px; cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- 開場 -->
+<div class="screen active" id="s-intro">
+  <div class="brand-mark">
+    <svg viewBox="0 0 56 56" fill="none">
+      <circle cx="28" cy="28" r="26" fill="#40916C" opacity=".15"/>
+      <path d="M28 10C28 10 16 20 16 30C16 36.6 21.4 42 28 42C34.6 42 40 36.6 40 30C40 20 28 10 28 10Z" fill="#2D6A4F"/>
+      <path d="M28 20C28 20 22 26 22 30C22 33.3 24.7 36 28 36C31.3 36 34 33.3 34 30C34 26 28 20 28 20Z" fill="#74C69D"/>
+    </svg>
+  </div>
+  <div class="intro-label">TYL × 個人養髮顧問</div>
+  <div class="intro-title">讓我們了解<br>你的頭皮狀況</div>
+  <div class="intro-sub">只需 3 步驟，找出最適合你的養髮方向，讓 TYL 幫你打造健康頭皮。</div>
+  <button class="start-btn" onclick="goStep(1)">開始 →</button>
+</div>
+
+<!-- Step 1：問題選擇 -->
+<div class="screen" id="s-step1">
+  <div class="step-topbar">
+    <div class="step-progress-row">
+      <span class="step-label">Step 1 / 3</span>
+      <span class="step-count">選擇困擾</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" style="width:33%"></div></div>
+  </div>
+  <div class="step-q">你目前最大的<br>頭皮困擾是什麼？</div>
+  <div class="step-sub">選擇最符合你狀況的一項，我們會給你最精準的建議。</div>
+  <div class="opts-grid" id="problem-opts">
+    <div class="opt-card" onclick="selectProblem(0)">
+      <div class="opt-label">掉髮多</div>
+      <div class="opt-desc">梳頭或洗頭時掉很多</div>
+    </div>
+    <div class="opt-card" onclick="selectProblem(1)">
+      <div class="opt-label">細軟髮</div>
+      <div class="opt-desc">頭髮越來越細、沒有彈性</div>
+    </div>
+    <div class="opt-card" onclick="selectProblem(2)">
+      <div class="opt-label">頭皮出油</div>
+      <div class="opt-desc">頭皮容易出油、悶熱</div>
+    </div>
+    <div class="opt-card" onclick="selectProblem(3)">
+      <div class="opt-label">頭皮癢</div>
+      <div class="opt-desc">頭皮常常發癢不舒服</div>
+    </div>
+    <div class="opt-card" onclick="selectProblem(4)">
+      <div class="opt-label">髮量稀少</div>
+      <div class="opt-desc">髮量明顯減少、頭皮外露</div>
+    </div>
+    <div class="opt-card" onclick="selectProblem(5)">
+      <div class="opt-label">其他</div>
+      <div class="opt-desc">有其他頭皮困擾</div>
+    </div>
+  </div>
+  <button class="next-btn" id="btn-step1" onclick="goStep(2)">下一步 →</button>
+</div>
+
+<!-- Step 2：安心說明 -->
+<div class="screen" id="s-step2">
+  <div class="step-topbar">
+    <div class="step-progress-row">
+      <span class="step-label">Step 2 / 3</span>
+      <span class="step-count">了解改善方向</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" style="width:66%"></div></div>
+  </div>
+  <div class="step-q" id="step2-q">針對你的困擾，<br>TYL 這樣幫助你</div>
+  <div class="reassure-box">
+    <div class="reassure-tag" id="step2-tag">問題標籤</div>
+    <div class="reassure-text" id="step2-text">說明文字</div>
+  </div>
+  <button class="next-btn show" onclick="goStep(3)">繼續 →</button>
+</div>
+
+<!-- Step 3：里程碑選擇 -->
+<div class="screen" id="s-step3">
+  <div class="step-topbar">
+    <div class="step-progress-row">
+      <span class="step-label">Step 3 / 3</span>
+      <span class="step-count">設定期待</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" style="width:100%"></div></div>
+  </div>
+  <div class="step-q">你最想先看到<br>哪個改變？</div>
+  <div class="step-sub">養髮是循序漸進的過程，選一個你最期待的里程碑。</div>
+  <div class="milestone-grid" id="ms-opts">
+    <div class="ms-card" onclick="selectMS(0)">
+      <div class="ms-num">里程碑 1</div>
+      <div class="ms-label">頭皮透氣</div>
+      <div class="ms-desc">頭皮比以前更透氣舒適</div>
+    </div>
+    <div class="ms-card" onclick="selectMS(1)">
+      <div class="ms-num">里程碑 2</div>
+      <div class="ms-label">掉髮減少</div>
+      <div class="ms-desc">洗頭後掉髮真的變少</div>
+    </div>
+    <div class="ms-card" onclick="selectMS(2)">
+      <div class="ms-num">里程碑 3</div>
+      <div class="ms-label">頭髮變強韌</div>
+      <div class="ms-desc">頭髮有彈性不易斷</div>
+    </div>
+    <div class="ms-card" onclick="selectMS(3)">
+      <div class="ms-num">里程碑 4</div>
+      <div class="ms-label">長出小細毛</div>
+      <div class="ms-desc">看到新生細絨毛冒出</div>
+    </div>
+    <div class="ms-card" onclick="selectMS(4)">
+      <div class="ms-num">里程碑 5</div>
+      <div class="ms-label">髮縫縮小</div>
+      <div class="ms-desc">髮縫不再那麼明顯</div>
+    </div>
+    <div class="ms-card" onclick="selectMS(5)">
+      <div class="ms-num">里程碑 6</div>
+      <div class="ms-label">養髮成功</div>
+      <div class="ms-desc">重新擁有一頭秀髮</div>
+    </div>
+  </div>
+  <button class="next-btn" id="btn-step3" onclick="goStep(4)">查看我的結果 →</button>
+</div>
+
+<!-- Step 4：結果 + 回傳 -->
+<div class="screen" id="s-result">
+  <div class="step-topbar">
+    <div class="step-progress-row">
+      <span class="step-label">你的養髮方向</span>
+      <span class="step-count">完成</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" style="width:100%"></div></div>
+  </div>
+  <div class="step-q">你的個人養髮檔案</div>
+  <div class="result-summary">
+    <div class="result-row">
+      <div class="result-key">我最大的困擾</div>
+      <div class="result-val" id="r-problem">—</div>
+    </div>
+    <div class="result-row">
+      <div class="result-key">最想先看到</div>
+      <div class="result-val" id="r-ms">—</div>
+    </div>
+  </div>
+  <button class="send-btn" id="send-btn" onclick="sendResult()">傳送結果給顧問</button>
+</div>
+
+<!-- Step 5：里程碑 2 鼓勵 -->
+<div class="screen" id="s-end">
+  <div class="ms2-box">
+    <div class="ms2-badge">養髮關鍵里程碑</div>
+    <div class="ms2-title">
+      接下來，我們一起<br>往<span>里程碑 2</span> 邁進
+    </div>
+    <div class="ms2-divider"></div>
+    <div class="ms2-body">
+      「<strong style="color:#74C69D">掉髮減少</strong>」是養髮過程中<br>
+      最最最重要的一步。<br><br>
+      當你看到掉髮減少的那一刻，<br>
+      代表你的頭皮已經煥然一新。<br><br>
+      毛囊正在重新獲得養分，<br>
+      頭皮環境已經開始改變。<br>
+      這是你的頭髮重生的起點。
+    </div>
+  </div>
+  <div class="reassure-box" style="margin-bottom:20px;">
+    <div class="reassure-tag">專屬電子書</div>
+    <div class="reassure-text">
+      我們會根據你的狀況，為你準備專屬的 TYL 養髮指南電子書，幫助你更快達到里程碑 2。<br><br>
+      顧問收到你的結果後會盡快傳給你！
+    </div>
+  </div>
+  <button class="next-btn show" onclick="goStep(5)" style="margin-bottom:12px;">確認，繼續 →</button>
+  <button class="restart-btn" onclick="restart()">重新填寫</button>
+</div>
+
+<script>
+const PROBLEMS = [
+  { label: '掉髮多', tag: '掉髮困擾', text: '掉髮通常是毛囊進入休止期的訊號。TYL 養髮液能活化休眠毛囊、穩固髮根，大部分客人在使用 2–4 週後會發現洗頭時的落髮明顯減少，頭皮環境也逐漸恢復健康平衡。' },
+  { label: '細軟髮', tag: '細軟髮困擾', text: '細軟髮代表毛囊的養分供給不足。TYL 能深層改善頭皮血液循環，讓毛囊重新獲得充足養分，頭髮會逐漸變得粗壯、有彈性，不再軟趴趴。' },
+  { label: '頭皮出油', tag: '頭皮出油困擾', text: '頭皮出油是皮脂腺過度分泌的表現，通常與頭皮環境失衡有關。TYL 能調節頭皮的油水平衡，讓頭皮恢復正常的分泌狀態，不再過度出油。' },
+  { label: '頭皮癢', tag: '頭皮癢困擾', text: '頭皮癢通常與頭皮環境失衡有關。TYL 能舒緩頭皮、改善頭皮微環境，讓頭皮逐漸恢復健康穩定的狀態，減少不適感。' },
+  { label: '髮量稀少', tag: '髮量稀少困擾', text: '髮量稀少代表部分毛囊已進入萎縮或休眠階段。TYL 能喚醒尚有生機的毛囊，促進細絨毛生長，逐步恢復髮量，讓頭皮不再外露。' },
+  { label: '其他困擾', tag: '頭皮困擾', text: 'TYL 養髮液全面改善頭皮環境，活化休眠毛囊、穩固髮根、促進血液循環，為各種頭皮問題提供根本的改善方向，讓頭皮重新恢復健康狀態。' },
+];
+
+const MILESTONES = [
+  '里程碑1（頭皮透氣）',
+  '里程碑2（掉髮減少）',
+  '里程碑3（頭髮變強韌）',
+  '里程碑4（長出小細毛）',
+  '里程碑5（髮縫縮小）',
+  '里程碑6（養髮成功）',
+];
+
+let selectedProblem = -1;
+let selectedMS = -1;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goStep(n) {
+  if (n === 1) showScreen('s-step1');
+  else if (n === 2) {
+    const p = PROBLEMS[selectedProblem];
+    document.getElementById('step2-tag').textContent = p.tag;
+    document.getElementById('step2-text').textContent = p.text;
+    showScreen('s-step2');
+  }
+  else if (n === 3) showScreen('s-step3');
+  else if (n === 4) showScreen('s-end');
+  else if (n === 5) {
+    document.getElementById('r-problem').textContent = PROBLEMS[selectedProblem].label;
+    document.getElementById('r-ms').textContent = MILESTONES[selectedMS];
+    const sb = document.getElementById('send-btn');
+    sb.classList.remove('sent');
+    sb.textContent = '傳送結果給顧問';
+    showScreen('s-result');
+  }
+}
+
+function selectProblem(idx) {
+  selectedProblem = idx;
+  document.querySelectorAll('#problem-opts .opt-card').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('btn-step1').classList.add('show');
+}
+
+function selectMS(idx) {
+  selectedMS = idx;
+  document.querySelectorAll('#ms-opts .ms-card').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('btn-step3').classList.add('show');
+}
+
+function sendResult() {
+  const btn = document.getElementById('send-btn');
+  if (btn.classList.contains('sent')) return;
+  const msText = MILESTONES[selectedMS];
+  const msNum = msText.match(/\d/)[0];
+  const msLabel = msText.match(/（(.+)）/)[1];
+  const msg = `諮詢｜${PROBLEMS[selectedProblem].label}｜里程碑${msNum}${msLabel}`;
+  try {
+    if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+      liff.openWindow({ url: `https://line.me/R/oaMessage/@tyltyltyl/?${encodeURIComponent(msg)}`, external: false });
+    } else {
+      window.open(`https://line.me/R/oaMessage/@tyltyltyl/?${encodeURIComponent(msg)}`, '_blank');
+    }
+  } catch(e) {}
+  btn.classList.add('sent');
+  btn.textContent = '已傳送';
+}
+
+function restart() {
+  selectedProblem = -1; selectedMS = -1;
+  document.querySelectorAll('.opt-card, .ms-card').forEach(el => el.classList.remove('selected'));
+  document.getElementById('btn-step1').classList.remove('show');
+  document.getElementById('btn-step3').classList.remove('show');
+  showScreen('s-intro');
+}
+
+try { liff.init({ liffId: '2009975760-inVZaiRo' }).catch(() => {}); } catch(e) {}
+</script>
+</body>
+</html>
